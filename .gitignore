@@ -16,6 +16,7 @@ npm-debug.log*
 # Build output
 dist/
 build/
+.next/
 
 # Temporary files
 *.tmp
