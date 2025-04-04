@@ -9,8 +9,9 @@ import { buildFinalMessages } from "@/lib/build-prompt"
 import { Tables } from "@/supabase/types"
 import { ChatMessage, ChatPayload, LLMID, ModelProvider } from "@/types"
 import { useRouter } from "next/navigation"
-import { useContext, useEffect, useRef } from "react"
+import { useContext, useEffect, useRef,useState } from "react"
 import { LLM_LIST } from "../../../lib/models/llm/llm-list"
+import prohibitedWordsData from "@/filter/eng.json"; // Adjust the path as necessary
 import {
   createTempMessages,
   handleCreateChat,
@@ -23,6 +24,12 @@ import {
 } from "../chat-helpers"
 
 export const useChatHandler = () => {
+const [prohibitedWords, setProhibitedWords] = useState(prohibitedWordsData);
+const containsProfanity = (text:string) => {
+  const regex = new RegExp(`\\b(${prohibitedWords.join("|")})\\b`, "i");
+  return regex.test(text);
+};
+
   const router = useRouter()
 
   const {
@@ -194,7 +201,12 @@ export const useChatHandler = () => {
     isRegeneration: boolean
   ) => {
     const startingInput = messageContent
-
+    // Check for foul language
+    if (containsProfanity(messageContent)) {
+      alert("Your message contains inappropriate language. Please revise.");
+      setUserInput(startingInput); // Reset the input
+      return;
+    }
     try {
       setUserInput("")
       setIsGenerating(true)
